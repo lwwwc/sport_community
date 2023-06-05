@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUI 注册</title>
+<!--    <script src="js/mui.min.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet"/> -->
+</head>
+<body>
+  <div class="mui-content">
+    <form id="register-form" class="mui-input-group">
+      <div class="mui-input-row">
+        <label>手机号码</label>
+        <input type="tel" name="phone" placeholder="请输入手机号码">
+      </div>
+      <div class="mui-input-row">
+        <label>验证码</label>
+        <input type="tel" name="verifyCode" placeholder="请输入验证码">
+        <button type="button" class="mui-btn mui-btn-primary" id="get-verify-code">获取验证码</button>
+      </div>
+      <div class="mui-input-row">
+        <label>密码</label>
+        <input type="password" name="password" placeholder="请输入密码">
+      </div>
+      <div class="mui-input-row">
+        <button type="submit" class="mui-btn mui-btn-primary">注册</button>
+      </div>
+    </form>
+  </div>
+  <!-- 引入自定义 JS 文件 -->
+  <!-- <script src="path/to/custom/js/script.js"></script> -->
+</body>
+<script type="text/javascript">
+	// 获取验证码按钮点击事件处理函数
+	document.querySelector('#get-verify-code').addEventListener('tap', function() {
+	  var button = this;
+	  var count = 60; // 倒计时时间
+	  var timer = setInterval(function() {
+	    count--;
+	    if (count <= 0) {
+	      clearInterval(timer);
+	      button.innerText = '获取验证码';
+	      button.disabled = false;
+	    } else {
+	      button.innerText = count + ' 秒后重新获取';
+	      button.disabled = true;
+	    }
+	  }, 1000);
+	});
+
+</script>
+</html>
+
+// 初始化Pusher客户端
+var pusher = new Pusher("key", {
+	cluster: "mycluster",
+	authEndpoint: app.serverUrl+'/pusher/auth'
+});
+var user = app.getUserGlobalInfo();
+// 订阅私有频道
+var channel = pusher.subscribe("private-" + user.id);
+
+// 监听提醒消息
+channel.bind('reminder', function(data) {
+	mui.alert('你好时间到啦,你该'+data+"了!", '每日提醒~', function() {
+		
+	});
+});

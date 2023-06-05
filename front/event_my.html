@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<form class="mui-input-group">
+				<div class="mui-input-row">
+					<label>签到码</label>
+					<input id="txt_code" type="text" placeholder="请输入签到码">
+				</div>
+				
+				<div class="mui-button-row">
+					<button id="checkCode_btn" class="mui-btn mui-btn-primary" type="button" onclick="return false;">签到</button>&nbsp;&nbsp;
+					<button id="publishCode_btn" class="mui-btn mui-btn-primary" type="button" onclick="return false;">发布签到码</button>
+					<button id="detail_btn" class="mui-btn mui-btn-primary" type="button" onclick="return false;">详情</button>
+				</div>
+			</form>
+
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#" id="event">已报名的活动</a>
+					<div class="mui-collapse-content" id="event_list">
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#" id="eventDone">已完成的活动(点击评价)</a>
+					<div class="mui-collapse-content" id="done_list">
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#" id="all_event">我发布的活动</a>
+					<div class="mui-collapse-content">
+						<form class="mui-input-group"  id="all_event_list">
+							
+						</form>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+				var current = plus.webview.currentWebview();
+				var clubId = current.clubId;
+				var clubName = current.clubName;
+				
+				//发布签到码
+				var publishCode_btn = document.getElementById("publishCode_btn");
+				var selected_event = 0;
+				publishCode_btn.addEventListener("tap", function(){
+					var radio = document.getElementsByName("radio1");
+					for(var i = 0; i<radio.length; i++){
+						if(radio[i].checked){
+							selected_event =  radio[i].value;
+						}
+					}
+					if(selected_event == 0){
+						app.showToast("请选择要发布签到码的活动","error");
+						return false;
+					}
+					
+					var usr = app.getUserGlobalInfo();
+					mui.ajax(app.serverUrl + "/event/getOtp", {
+						data: {
+							"eventId": selected_event,
+							"telephone": user.telephone
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓
+								app.showToast("你的签到码为:"+data.data,"success");
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+				});
+				
+				
+				//签到
+				var checkCode_btn = document.getElementById("checkCode_btn");
+				checkCode_btn.addEventListener("tap", function(){
+					var txt_code = document.getElementById("txt_code");
+					if(!app.isNotNull(txt_code.value)){
+						app.showToast("请输入验证码","error");
+						return false;
+					}
+					
+					var user = app.getUserGlobalInfo();
+					mui.ajax(app.serverUrl + "/event/check", {
+						data: {
+							"clubId": clubId,
+							"telephone": user.telephone,
+							"otpCode": txt_code.value
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓
+								app.showToast("签到成功","success");
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+				});
+				
+				//详情
+				var detail_btn = document.getElementById("detail_btn");
+				detail_btn.addEventListener("tap", function(){
+					var radio = document.getElementsByName("radio1");
+					for(var i = 0; i<radio.length; i++){
+						if(radio[i].checked){
+							selected_event =  radio[i].value;
+						}
+					}
+					if(selected_event == 0){
+						app.showToast("请选择查看统计数据的活动","error");
+						return false;
+					}
+					mui.openWindow({
+						url:"event_stu.html",
+						id:"event_stu.html",
+						extras:{
+							"eventId": selected_event,
+						}
+					});
+				});
+				
+				
+				mui('#event_list').on("tap",".event",function(){
+					var eventId = this.getAttribute("eventId");
+					// console.log(eventId);
+					mui.openWindow({
+						url: 'event_detail.html',
+						id: 'event_detail.html',
+						extras:{
+							eventId: eventId
+						}
+					});
+				});
+				
+				mui('#done_list').on("tap",".event",function(){
+					var eventId = this.getAttribute("eventId");
+					var rate = this.getAttribute("rate");
+					// console.log(eventId);
+					mui.openWindow({
+						url: 'event_rate.html',
+						id: 'event_rate.html',
+						extras:{
+							eventId: eventId,
+							rate: rate
+						}
+					});
+				});
+				
+				
+				var event = document.getElementById("event");
+				var event_flag = false;
+				var user = app.getUserGlobalInfo();
+				event.addEventListener("tap", function(){
+					if(!event_flag){
+						mui.ajax(app.serverUrl + "/event/listMyJoin", {
+							data: {
+								"clubId": clubId,
+								"telephone": user.telephone
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									var list = document.getElementById("event_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class="mui-navigate-right event" eventId="'+ comment.eventId+'">' +
+																comment.eventName +
+															'</a>' +
+															'</li>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						join_flag = true;
+					}else{
+						// console.log("else");
+						join_flag = false;
+					}
+					
+				});
+				
+				
+				var eventDone = document.getElementById("eventDone");
+				var eventDone_flag = false;
+				var user = app.getUserGlobalInfo();
+				eventDone.addEventListener("tap", function(){
+					if(!eventDone_flag){
+						mui.ajax(app.serverUrl + "/event/listMyDone", {
+							data: {
+								"clubId": clubId,
+								"telephone": user.telephone
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								if (data.status == "success") {
+									// console.log(JSON.stringify(data.data));
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									var list = document.getElementById("done_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class=" event" eventId="'+ comment.eventId+'" rate="'+ comment.rate +'" >' +
+																comment.eventName +
+															'<span class="mui-pull-right">评分: '+comment.rate+'</span>' +
+															'</a>' +
+															'</li>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						join_flag = true;
+					}else{
+						// console.log("else");
+						join_flag = false;
+					}
+					
+				});
+			
+			
+				var all_event = document.getElementById("all_event");
+				var all_event_flag = false;
+				all_event.addEventListener("tap", function(){
+					if(!all_event_flag){
+						mui.ajax(app.serverUrl + "/event/listMyPublish", {
+							data: {
+								"clubId": clubId,
+								"telephone": user.telephone
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								// console.log(JSON.stringify(data));
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									
+									var list = document.getElementById("all_event_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+											var comment_html =  '<div class="mui-input-row mui-radio mui-left">' +
+																'<label>' + comment.eventName+ '</label>' + 
+																'<input name="radio1" type="radio" value="'+ comment.eventId +'">' +
+																'</div>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						all_event_flag = true;
+					}else{
+						// console.log("else");
+						all_event_flag = false;
+					}
+					
+				});
+			
+			});
+		</script>
+	</body>
+
+</html>

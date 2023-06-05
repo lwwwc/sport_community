@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+	
+
+	<body>
+		
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color" id="title">俱乐部展示</h1>
+		</header>
+		
+		<div class="mui-content">
+			<div class="mui-card">
+				<!--页眉，放置标题-->
+				<div class="mui-card-header" id="name">
+					
+				</div>
+				<!--内容区-->
+				<div class="mui-card-content">
+					<h4>描述:</h4>
+					<p id="desc"></p>
+				</div>
+				<!--页脚，放置补充信息或支持的操作-->
+				<div class="mui-card-footer">
+					<div>
+						<button class="mui-btn mui-btn-green" style="height: 40px;" id="join_btn">加入</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap",function(){
+					mui.back();
+				});
+				
+				
+				
+				var current = plus.webview.currentWebview();
+				var clubId = current.clubId;
+				// console.log(postId);
+				mui.ajax(app.serverUrl + "/club/look", {
+					data: {
+						"clubId": clubId
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						if (data.status == "success") {
+							var name = document.getElementById("name");
+							var desc = document.getElementById("desc");
+							name.innerText = data.data.clubName +"(Id:"+ data.data.clubId +")";
+							desc.innerText = data.data.clubDesc;
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+			
+				
+				var join_btn = document.getElementById("join_btn");
+				join_btn.addEventListener("tap",function(){
+				var user = app.getUserGlobalInfo();
+				mui.ajax(app.serverUrl + "/club/join", {
+					data: {
+						telephone: user.telephone,
+						clubId: clubId
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						if (data.status == "success") {
+							// 登录或者注册成功之后，保存全局用户对象到本地缓
+							app.showToast("添加成功", "success");
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+				});
+			});
+		</script>
+	</body>
+
+</html>

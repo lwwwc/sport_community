@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lwc.sportcommunity.dao.PrivateMessageDoMapper">
+  <resultMap id="BaseResultMap" type="com.lwc.sportcommunity.dataobject.PrivateMessageDo">
+    <constructor>
+      <idArg column="chat_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="from_user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="to_user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="message" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="created_at" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    chat_id, from_user_id, to_user_id, message, created_at
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from private_message
+    where chat_id = #{chatId,jdbcType=INTEGER}
+  </select>
+  <select id="selectUnReadMsgList" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select *
+    from private_message
+    where chat_id  > #{msgId,jdbcType=INTEGER}
+    and( (from_user_id = #{myId,jdbcType=INTEGER} and to_user_id = #{friendId,jdbcType=INTEGER})
+    or (from_user_id = #{friendId,jdbcType=INTEGER} and to_user_id = #{myId,jdbcType=INTEGER}) )
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from private_message
+    where chat_id = #{chatId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lwc.sportcommunity.dataobject.PrivateMessageDo">
+    insert into private_message (chat_id, from_user_id, to_user_id, 
+      message, created_at)
+    values (#{chatId,jdbcType=INTEGER}, #{fromUserId,jdbcType=INTEGER}, #{toUserId,jdbcType=INTEGER}, 
+      #{message,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lwc.sportcommunity.dataobject.PrivateMessageDo" useGeneratedKeys="true" keyProperty="chat_id">
+    insert into private_message
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="chatId != null">
+        chat_id,
+      </if>
+      <if test="fromUserId != null">
+        from_user_id,
+      </if>
+      <if test="toUserId != null">
+        to_user_id,
+      </if>
+      <if test="message != null">
+        message,
+      </if>
+      <if test="createdAt != null">
+        created_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="chatId != null">
+        #{chatId,jdbcType=INTEGER},
+      </if>
+      <if test="fromUserId != null">
+        #{fromUserId,jdbcType=INTEGER},
+      </if>
+      <if test="toUserId != null">
+        #{toUserId,jdbcType=INTEGER},
+      </if>
+      <if test="message != null">
+        #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+    <selectKey resultType="int" keyProperty="chatId" order="AFTER">
+      select @@identity
+    </selectKey>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lwc.sportcommunity.dataobject.PrivateMessageDo">
+    update private_message
+    <set>
+      <if test="fromUserId != null">
+        from_user_id = #{fromUserId,jdbcType=INTEGER},
+      </if>
+      <if test="toUserId != null">
+        to_user_id = #{toUserId,jdbcType=INTEGER},
+      </if>
+      <if test="message != null">
+        message = #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where chat_id = #{chatId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lwc.sportcommunity.dataobject.PrivateMessageDo">
+    update private_message
+    set from_user_id = #{fromUserId,jdbcType=INTEGER},
+      to_user_id = #{toUserId,jdbcType=INTEGER},
+      message = #{message,jdbcType=VARCHAR},
+      created_at = #{createdAt,jdbcType=TIMESTAMP}
+    where chat_id = #{chatId,jdbcType=INTEGER}
+  </update>
+</mapper>

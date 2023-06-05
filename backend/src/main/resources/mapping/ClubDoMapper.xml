@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lwc.sportcommunity.dao.ClubDoMapper">
+  <resultMap id="BaseResultMap" type="com.lwc.sportcommunity.dataobject.ClubDo">
+    <constructor>
+      <idArg column="club_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="club_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </constructor>
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.lwc.sportcommunity.dataobject.ClubDo">
+    <constructor>
+      <idArg column="club_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="club_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="club_desc" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    club_id, club_name
+  </sql>
+  <sql id="Blob_Column_List">
+    club_desc
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from clubs
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll"  resultMap="ResultMapWithBLOBs">
+    select *
+    from clubs
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from clubs
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lwc.sportcommunity.dataobject.ClubDo">
+    insert into clubs (club_id, club_name, club_desc
+      )
+    values (#{clubId,jdbcType=INTEGER}, #{clubName,jdbcType=VARCHAR}, #{clubDesc,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lwc.sportcommunity.dataobject.ClubDo" useGeneratedKeys="true" keyProperty="club_id">
+    insert into clubs
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="clubId != null">
+        club_id,
+      </if>
+      <if test="clubName != null">
+        club_name,
+      </if>
+      <if test="clubDesc != null">
+        club_desc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="clubId != null">
+        #{clubId,jdbcType=INTEGER},
+      </if>
+      <if test="clubName != null">
+        #{clubName,jdbcType=VARCHAR},
+      </if>
+      <if test="clubDesc != null">
+        #{clubDesc,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+    <selectKey resultType="int" keyProperty="clubId" order="AFTER">
+      select @@identity
+    </selectKey>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lwc.sportcommunity.dataobject.ClubDo">
+    update clubs
+    <set>
+      <if test="clubName != null">
+        club_name = #{clubName,jdbcType=VARCHAR},
+      </if>
+      <if test="clubDesc != null">
+        club_desc = #{clubDesc,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.lwc.sportcommunity.dataobject.ClubDo">
+    update clubs
+    set club_name = #{clubName,jdbcType=VARCHAR},
+      club_desc = #{clubDesc,jdbcType=LONGVARCHAR}
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lwc.sportcommunity.dataobject.ClubDo">
+    update clubs
+    set club_name = #{clubName,jdbcType=VARCHAR}
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </update>
+</mapper>

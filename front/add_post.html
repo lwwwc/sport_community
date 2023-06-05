@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color">发表你的知识库</h1>
+			<span id="link_add" class="mui-pull-right mui-icon mui-icon mui-icon mui-icon-checkmarkempty"></span>
+		</header>
+		<div class="mui-content">
+			<div class="mui-input-row mui-content-padded">
+				<input id="txt_title" type="text" placeholder="请输入标题">
+			</div>
+			<div class="mui-input-row mui-content-padded">
+				<textarea name="content" id="txt_content" cols="30" rows="15" style="overflow:scroll;"></textarea>
+			</div>
+			
+			
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			mui.plusReady(function(){
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap", function(){
+					mui.back();
+				});
+				
+				var link_add = document.getElementById("link_add");
+				link_add.addEventListener("tap", function(){
+					var txt_title = document.getElementById("txt_title");
+					var txt_content = document.getElementById("txt_content");
+					if(!app.isNotNull(txt_title.value)){
+						app.showToast("标题不能为空","error");
+						return false;
+					}else if(!app.isNotNull(txt_content.value)){
+						app.showToast("内容不能为空","error");
+						return false;
+					}else if(txt_title.value.length<=0 || txt_title.value.length > 30){
+						app.showToast("标题长度不符合","error");
+						return false;
+					}else{
+						var user = app.getUserGlobalInfo();
+						mui.ajax(app.serverUrl + "/post/create", {
+							data: {
+								telephone: user.telephone,
+								title: txt_title.value,
+								content: txt_content.value
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								console.log(JSON.stringify(data));
+						
+						
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									app.showToast("发表成功", "success");
+									// 页面跳转
+									mui.back();
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+					}
+					
+				});
+				
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color" id="title">活动评价</h1>
+			<span id="link_add" class="mui-pull-right mui-icon mui-icon mui-icon mui-icon-checkmarkempty"></span>
+		</header>
+		
+		<div class="mui-content">
+			<div class="mui-card">
+				<!--页眉，放置标题-->
+				<div class="mui-card-header" id="name">
+					
+				</div>
+				<!--内容区-->
+				<div class="mui-card-content">
+					<h4>Description:</h4>
+					<p id="desc"></p>
+					<h4>Data:</h4>
+					<p id="date"></p>
+					<h4>Location:</h4>
+					<p id="location"></p>
+				</div>
+				<!--页脚，放置补充信息或支持的操作-->
+				<div class="mui-card-footer">
+					<div>
+						<button class="mui-btn mui-btn-green mui-disabled" style="height: 40px;" id="join_btn">报名</button>
+						<button class="mui-btn mui-btn-green mui-disabled"  style="height: 40px;" id="cancel_btn">取消报名</button>
+					</div>
+					评分:
+					<div class="mui-numbox" data-numbox-step='1' data-numbox-min='0' data-numbox-max='5'>
+					  <button class="mui-btn mui-numbox-btn-minus" type="button">-</button>
+					  <input id="rate" class="mui-numbox-input" type="number" />
+					  <button class="mui-btn mui-numbox-btn-plus" type="button">+</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+					var current = plus.webview.currentWebview();
+					var link_back = document.getElementById("link_back");
+					link_back.addEventListener("tap",function(){
+						mui.back();
+					});
+					
+					var rate = document.getElementById("rate");
+					rate.value = current.rate;
+					
+					var link_add = document.getElementById("link_add");
+					link_add.addEventListener("tap", function(){
+						var rate = document.getElementById("rate").value;
+						var user = app.getUserGlobalInfo();
+						mui.ajax(app.serverUrl + "/event/rate", {
+							data: {
+								"eventId": eventId,
+								"telephone": user.telephone,
+								"content": rate
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								if (data.status == "success") {
+									// console.log(JSON.stringify(data));
+									app.showToast("评价成功","success");
+									mui.back();
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+					});
+					
+					var current = plus.webview.currentWebview();
+					var eventId = current.eventId;
+					// console.log(postId);
+					mui.ajax(app.serverUrl + "/event/look", {
+						data: {
+							"eventId": eventId
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							if (data.status == "success") {
+								// console.log(JSON.stringify(data));
+								var name = document.getElementById("name");
+								var desc = document.getElementById("desc");
+								var date = document.getElementById("date");
+								var location = document.getElementById("location");
+								name.innerText = data.data.eventName +"(Id:"+ data.data.eventId +")";
+								desc.innerText = data.data.eventDesc;
+								date.innerText = data.data.eventDatetime;
+								location.innerText = data.data.location;
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+				
+					
+					var join_btn = document.getElementById("join_btn");
+					join_btn.addEventListener("tap",function(){
+					var user = app.getUserGlobalInfo();
+					mui.ajax(app.serverUrl + "/event/join", {
+						data: {
+							telephone: user.telephone,
+							eventId: eventId
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓
+								app.showToast("报名成功", "success");
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+					});
+					
+					var cancel_btn = document.getElementById("cancel_btn");
+					cancel_btn.addEventListener("tap", function(){
+						var user = app.getUserGlobalInfo();
+						mui.ajax(app.serverUrl + "/event/cancel", {
+							data: {
+								telephone: user.telephone,
+								eventId: eventId
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									app.showToast("已取消报名", "success");
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+					});
+				});
+			</script>
+		</script>
+	</body>
+
+</html>

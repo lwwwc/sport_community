@@ -1,0 +1,157 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"-->
+<!--        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">-->
+<!--<generatorConfiguration>-->
+
+<!--    &lt;!&ndash;-->
+<!--        context标签：最重要的配置项 对应编码类org.mybatis.generator.config.Context-->
+<!--            id:Context示例的唯一ID，用于输出错误信息时候作为唯一标记-->
+<!--            targetRuntime:代码的生成模式-->
+<!--                MyBatis3	提供基本的基于动态SQL的CRUD方法和XXXByExample方法，会生成XML映射文件-->
+<!--                MyBatis3Simple	提供基本的基于动态SQL的CRUD方法，会生成XML映射文件-->
+<!--                MyBatis3DynamicSql	默认值，兼容JDK8+和MyBatis 3.4.2+，不会生成XML映射文件，忽略<sqlMapGenerator>的配置项，也就是Mapper全部注解化，依赖于MyBatis Dynamic SQL类库-->
+<!--            defaultModelType:实体的生成行为，默认conditional，targetRuntime为MyBatis3DynamicSql或者MyBatis3Kotlin时忽略此配置-->
+<!--    &ndash;&gt;-->
+<!--    <context id="mysqlGenerator" targetRuntime="MyBatis3">-->
+<!--        &lt;!&ndash;-->
+<!--            零个或者多个property，对应属性如下，一般用不到-->
+<!--            <property name="" value=""/>-->
+<!--                autoDelimitKeywords	是否使用分隔符号括住数据库关键字	false	例如MySQL中会使用反引号括住关键字-->
+<!--                beginningDelimiter	分隔符号的开始符号	"-->
+<!--                endingDelimiter	分隔符号的结束号	"-->
+<!--                javaFileEncoding	文件的编码	系统默认值	来源于java.nio.charset.Charset-->
+<!--                javaFormatter	类名和文件格式化器	DefaultJavaFormatter	见JavaFormatter和DefaultJavaFormatter-->
+<!--                targetJava8	是否JDK8和启动其特性	true-->
+<!--                kotlinFileEncoding	Kotlin文件编码	系统默认值	来源于java.nio.charset.Charset-->
+<!--                kotlinFormatter	Kotlin类名和文件格式化器	DefaultKotlinFormatter	见KotlinFormatter和DefaultKotlinFormatter-->
+<!--                xmlFormatter	XML文件格式化器	DefaultXmlFormatter	见XmlFormatter和DefaultXmlFormatter-->
+<!--        &ndash;&gt;-->
+
+<!--        &lt;!&ndash;-->
+<!--            plugin:用于引入一些插件对代码生成的一些特性进行扩展-->
+<!--                例如：引入org.mybatis.generator.plugins.SerializablePlugin插件会让生成的实体类-->
+<!--                     自动实现java.io.Serializable接口并且添加serialVersionUID属性。-->
+<!--              可选插件地址：http://mybatis.org/generator/reference/plugins.html-->
+<!--        &ndash;&gt;-->
+<!--        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>-->
+
+<!--        &lt;!&ndash;-->
+<!--            commentGenerator:标签是可选的，用于控制生成的实体的注释内容-->
+<!--            有四个属性：-->
+<!--                suppressAllComments	是否生成注释	false-->
+<!--                suppressDate	是否在注释中添加生成的时间戳	false-->
+<!--                dateFormat	配合suppressDate使用，指定输出时间戳的格式	java.util.Date#toString()-->
+<!--                addRemarkComments	是否输出表和列的Comment信息	false-->
+<!--        &ndash;&gt;-->
+<!--        <commentGenerator>-->
+<!--            <property name="suppressAllComments" value="true" />-->
+<!--        </commentGenerator>-->
+<!--        &lt;!&ndash; 数据库链接URL、用户名、密码 对应编码类JDBCConnectionConfiguration&ndash;&gt;-->
+<!--        <jdbcConnection-->
+<!--                driverClass="com.mysql.jdbc.Driver"-->
+<!--                connectionURL="jdbc:mysql://127.0.0.1:3306/sport_community?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC"-->
+<!--                userId="root"-->
+<!--                password="admin"/>-->
+<!--        &lt;!&ndash;<jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@localhost:1521:orcl" userId="msa" password="msa"/>&ndash;&gt;-->
+
+<!--        &lt;!&ndash;-->
+<!--            javaTypeResolver：用于解析和计算数据库列类型和Java类型的映射关系，可以不配置-->
+<!--            有两个属性：-->
+<!--                forceBigDecimals  是否强制把所有的数字类型强制使用java.math.BigDecimal类型表示	false-->
+<!--                useJSR310Types	是否支持JSR310，主要是JSR310的新日期类型	false-->
+<!--                    数据库（JDBC）类型	        Java类型-->
+<!--                        DATE	            java.time.LocalDate-->
+<!--                         TIME	            java.time.LocalTime-->
+<!--                       TIMESTAMP	        java.time.LocalDateTime-->
+<!--                      TIME_WITH_TIMEZONE	java.time.OffsetTime-->
+<!--                  TIMESTAMP_WITH_TIMEZONE	java.time.OffsetDateTime-->
+<!--        &ndash;&gt;-->
+<!--        &lt;!&ndash;<javaTypeResolver>-->
+<!--            <property name="forceBigDecimals" value="false" />-->
+<!--        </javaTypeResolver>&ndash;&gt;-->
+
+<!--        &lt;!&ndash;-->
+<!--            javaModelGenerator：主要用于控制实体（Model）类的代码生成行为-->
+<!--                targetPackage:生成的实体类的包名-->
+<!--                targetProject:生成的实体类文件相对于项目（根目录）的位置-->
+<!--                可配置属性：-->
+<!--                    constructorBased:是否生成一个带有所有字段属性的构造函数，默认false，MyBatis3Kotlin模式下忽略此属性配置-->
+<!--                    enableSubPackages:是否允许通过Schema生成子包,默认false，如果为true，-->
+<!--                        例如包名为club.throwable，如果Schema为xyz，那么实体类文件最终会生成在club.throwable.xyz目录，不存在创建-->
+<!--                    exampleTargetPackage：生成的伴随实体类的Example类的包名-->
+<!--                    exampleTargetProject：生成的伴随实体类的Example类文件相对于项目（根目录）的位置-->
+<!--                    immutable：是否不可变	false，如果为true，则不会生成Setter方法，所有字段都使用final修饰，提供一个带有所有字段属性的构造函数-->
+<!--                    rootClass：为生成的实体类添加父类，通过value指定父类的全类名即可-->
+<!--                    trimStrings：Setter方法是否对字符串类型进行一次trim操作，默认false-->
+<!--        &ndash;&gt;-->
+<!--        <javaModelGenerator targetPackage="com.lwc.sportcommunity.dataobject" targetProject="src/main/java">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <property name="trimStrings" value="true" />-->
+<!--            <property name="constructorBased" value="true" />-->
+<!--        </javaModelGenerator>-->
+
+<!--        &lt;!&ndash;-->
+<!--            sqlMapGenerator：主要用于控制XML映射文件的代码生成行为-->
+<!--                targetPackage	生成的XML映射文件的包名-->
+<!--                targetProject	生成的XML映射文件相对于项目（根目录）的位置-->
+<!--              如下配置，相当于在resources目录下创建mapper目录存放生成的*.xml文件-->
+<!--            enableSubPackages:创建子包-->
+<!--        &ndash;&gt;-->
+<!--        <sqlMapGenerator targetPackage="mapping" targetProject="src/main/resources">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--        </sqlMapGenerator>-->
+
+<!--        &lt;!&ndash;-->
+<!--            javaClientGenerator：主要用于控制Mapper接口的代码生成行为-->
+<!--            三个属性：-->
+<!--                type：Mapper接口生成策略-->
+<!--                    ANNOTATEDMAPPER：Mapper接口生成的时候依赖于注解和SqlProviders（也就是纯注解实现），不会生成XML映射文件。-->
+<!--                    XMLMAPPER：Mapper接口生成接口方法，对应的实现代码生成在XML映射文件中（也就是纯映射文件实现）。-->
+<!--                    MIXEDMAPPER：Mapper接口生成的时候复杂的方法实现生成在XML映射文件中，-->
+<!--                                 而简单的实现通过注解和SqlProviders实现（也就是注解和映射文件混合实现）-->
+<!--                targetPackage：生成的Mapper接口的包名-->
+<!--                targetProject：生成的Mapper接口文件相对于项目（根目录）的位置	Y	例如src/main/java-->
+<!--             注意：-->
+<!--                <context>标签的targetRuntime属性指定为MyBatis3Simple的时候，type只能选用ANNOTATEDMAPPER或者XMLMAPPER。-->
+<!--                <context>标签的targetRuntime属性指定为MyBatis3的时候，type可以选用ANNOTATEDMAPPER、XMLMAPPER或者MIXEDMAPPER。-->
+<!--            property：-->
+<!--                enableSubPackages：是否允许通过Schema生成子包，默认false，自动创建不存在的包-->
+<!--                useLegacyBuilder：是否通过SQL Builder生成动态SQL，默认false-->
+<!--                rootInterface	为生成的Mapper接口添加父接口-->
+<!--        &ndash;&gt;-->
+<!--        <javaClientGenerator type="XMLMAPPER"-->
+<!--                             targetPackage="com.lwc.sportcommunity.dao"-->
+<!--                             targetProject="src/main/java">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <property name="useLegacyBuilder" value="true" />-->
+<!--        </javaClientGenerator>-->
+
+
+<!--        &lt;!&ndash;-->
+<!--            table：要生成的目标表-->
+<!--                常用属性：-->
+<!--                tableName：数据库表名称-->
+<!--                alias：表别名，如果指定了此值，则查询列的时候结果格式为【别名+列名】-->
+<!--                domainObjectName：表对应的实体类名称，可以通过.指定包路径，如果指定了bar.User，则包名为bar，实体类名称为User-->
+<!--                mapperName：表对应的Mapper接口类名称，可以通过.指定包路径，如果指定了bar.UserMapper，则包名为bar，Mapper接口类名称为UserMapper-->
+<!--                delimitAllColumns：是否所有的列都添加分隔符，默认值为false，如果设置为true，所有列名会添加起始和结束分隔符-->
+<!--                还有一些默认属性，生成方法true的不配置了-->
+<!--                表的property-->
+<!--                    constructorBased，是否为实体类生成一个带有所有字段的构造函数，默认false-->
+<!--                    ignoreQualifiersAtRuntime：是否在运行时忽略别名-->
+<!--                    useActualColumnNames：是否使用列名作为实体类的属性名-->
+
+<!--        &ndash;&gt;-->
+<!--&lt;!&ndash;                <table tableName="clubs" domainObjectName="ClubDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="club_member" domainObjectName="ClubMemberDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="chat_records" domainObjectName="ChatRecordDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="event_attendens" domainObjectName="EventAttendenDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="events" domainObjectName="EventDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--        <table tableName="goal" domainObjectName="GoalDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>-->
+<!--&lt;!&ndash;        <table tableName="like_tb" domainObjectName="LikeDo"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;        <table tableName="user_info" domainObjectName="User"  enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="user_password" domainObjectName="UserPassword" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>&ndash;&gt;-->
+<!--&lt;!&ndash;         <table tableName="stock_log" domainObjectName="StockLogDO" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false" />&ndash;&gt;-->
+<!--&lt;!&ndash;        <table tableName="item_stock" domainObjectName="ItemStockDO" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false" />&ndash;&gt;-->
+<!--    </context>-->
+<!--</generatorConfiguration>-->

@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color">知识库列表</h1>
+			<span id="link_add" class="mui-pull-right mui-icon mui-icon mui-icon-plusempty"></span>
+		</header>
+		
+		<nav class="mui-bar mui-bar-tab ">
+			<a class="mui-tab-item mui-active" tabindex="0">首页</a>
+			<a class="mui-tab-item" tabindex="1">我的</a>
+		</nav>
+		<script src="js/mui.js"></script>
+		<script type="text/javascript">
+			var postArray = [
+				{
+					pageId: "post-list.html",
+					pageUrl: "post-list.html"
+				},
+				{
+					pageId: "my_post.html",
+					pageUrl: "my_post.html"
+				}
+			];
+			var muxinStyle = {
+				top: "44px",
+				bottom: "50px"
+			}
+			
+			
+			
+			mui.init();
+			mui.plusReady(function(){
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap", function(){
+					mui.back();
+				});
+				
+				var link_add = document.getElementById("link_add");
+				link_add.addEventListener("tap", function(){
+					mui.openWindow("add_post.html","add_post.html");
+				});
+				
+				var indexWebView = plus.webview.currentWebview();
+				
+				for(var i = 0; i < postArray.length; i++){
+					var muxinPage = plus.webview.create(postArray[i].pageUrl,
+														postArray[i].pageId,
+														muxinStyle);
+					muxinPage.hide();
+					indexWebView.append(muxinPage);
+				}
+				plus.webview.show(postArray[0].pageId);
+				mui(".mui-bar-tab").on("tap", "a", function(e){
+					var tableIndex = this.getAttribute("tabindex");
+					plus.webview.show(postArray[tableIndex].pageId, "fade-in", 200);
+					// console.log(tableIndex);
+						
+					for(var i = 0; i < postArray.length; i++){
+						if(i != tableIndex){
+							plus.webview.hide(postArray[i].pageId, "fade-out", 200);
+						}
+					}
+					// e.preventDefault();
+				});
+				
+				
+				
+			});
+		</script>
+	</body>
+
+</html>

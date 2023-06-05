@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/header.css">
+	<link rel="stylesheet" href="fontico/iconfont.css">
+	<script type="text/javascript" charset="utf-8">
+      	mui.init();
+		
+		mui.plusReady(function(){
+			plus.navigator.setStatusBarBackground("light");
+			plus.navigator.setStatusBarBackground("#C9394A");
+		});
+		
+    </script>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav title">
+		<h1 class="mui-title title-color">校内运动社区</h1>
+	</header>
+	
+	<nav class="mui-bar mui-bar-tab">
+<!-- 		<a class="mui-tab-item mui-active" tabindex="0">
+			<span class="mui-icon iconfont icon-fire"></span>
+			<span class="mui-tab-label">幕信</span>
+		</a> -->
+		<a class="mui-tab-item" tabindex="0">
+			<span class="mui-icon iconfont icon-tongxunlu"></span>
+			<span class="mui-tab-label">俱乐部</span>
+		</a>
+		<a class="mui-tab-item" tabindex="1">
+			<span class="mui-icon iconfont icon-pengyouquan"></span>
+			<span class="mui-tab-label">运动知识库</span>
+		</a>
+		<a class="mui-tab-item" tabindex="2">
+			<span class="mui-icon iconfont icon-wode"></span>
+			<span class="mui-tab-label">我</span>
+		</a>
+	</nav>
+
+	<script src="js/app.js"></script>
+	<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+	<script type="text/javascript">
+		var muxinArray = [
+			// {
+			// 	pageId: "imooc-chatlist.html",
+			// 	pageUrl: "imooc-chatlist.html"
+			// },
+			{
+				pageId: "imooc-contact.html",
+				pageUrl: "imooc-contact.html"
+			},
+			{
+				pageId: "imooc-discovery.html",
+				pageUrl: "imooc-discovery.html"
+			},
+			{
+				pageId: "imooc-me.html",
+				pageUrl: "imooc-me.html"
+			}
+		];
+		
+		var muxinStyle = {
+			top: "44px",
+			bottom: "50px"
+		}
+		
+		mui.plusReady(function(){
+			
+			//禁止返回到登录驻车页面
+			mui.back = function(){
+				return false;
+			}
+			
+			// Pusher.logToConsole = true;
+
+			
+			// 初始化Pusher客户端
+			var pusher = new Pusher("c958d27ec866b98de0b2", {
+			    cluster: "us2",
+				authEndpoint: app.serverUrl+'/pusher/auth'
+			});
+			var user = app.getUserGlobalInfo();
+			// 订阅私有频道
+			var channel = pusher.subscribe("private-" + user.id);
+			
+			// 监听提醒消息
+			channel.bind('reminder', function(data) {
+				mui.alert('你好时间到啦,你该'+data+"了!", '每日提醒~', function() {
+					
+				});
+			});
+			
+			var indexWebView = plus.webview.currentWebview();
+			
+			for(var i = 0; i < muxinArray.length; i++){
+				var muxinPage = plus.webview.create(muxinArray[i].pageUrl,
+													muxinArray[i].pageId,
+													muxinStyle);
+				muxinPage.hide();
+				indexWebView.append(muxinPage);
+			}
+			plus.webview.show(muxinArray[0].pageId);
+			
+			//匹狼绑定 tap实践
+			mui(".mui-bar-tab").on("tap", "a", function(){
+				var tableIndex = this.getAttribute("tabindex");
+				plus.webview.show(muxinArray[tableIndex].pageId, "fade-in", 200);
+				// console.log(tableIndex);
+					
+				for(var i = 0; i < muxinArray.length; i++){
+					if(i != tableIndex){
+						plus.webview.hide(muxinArray[i].pageId, "fade-out", 200);
+					}
+				}
+			});
+			
+		});
+	</script>
+	
+</body>
+</html>

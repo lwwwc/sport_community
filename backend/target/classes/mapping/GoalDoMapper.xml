@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lwc.sportcommunity.dao.GoalDoMapper">
+  <resultMap id="BaseResultMap" type="com.lwc.sportcommunity.dataobject.GoalDo">
+    <constructor>
+      <idArg column="goal_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="goal_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="reminder_time" javaType="java.util.Date" jdbcType="TIME" />
+      <arg column="is_completed" javaType="java.lang.Boolean" jdbcType="BIT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    goal_id, user_id, goal_name, reminder_time, is_completed
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from goal
+    where goal_id = #{goalId,jdbcType=INTEGER}
+  </select>
+  <select id="selectByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select *
+    from goal
+    where user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  <select id="selectByReminderTime"  resultMap="BaseResultMap">
+    select *
+    from goal
+    where reminder_time = #{time,jdbcType=TIME}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from goal
+    where goal_id = #{goalId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lwc.sportcommunity.dataobject.GoalDo">
+    insert into goal (goal_id, user_id, goal_name, 
+      reminder_time, is_completed)
+    values (#{goalId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{goalName,jdbcType=VARCHAR}, 
+      #{reminderTime,jdbcType=TIME}, #{isCompleted,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lwc.sportcommunity.dataobject.GoalDo">
+    insert into goal
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="goalId != null">
+        goal_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="goalName != null">
+        goal_name,
+      </if>
+      <if test="reminderTime != null">
+        reminder_time,
+      </if>
+      <if test="isCompleted != null">
+        is_completed,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="goalId != null">
+        #{goalId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="goalName != null">
+        #{goalName,jdbcType=VARCHAR},
+      </if>
+      <if test="reminderTime != null">
+        #{reminderTime,jdbcType=TIME},
+      </if>
+      <if test="isCompleted != null">
+        #{isCompleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lwc.sportcommunity.dataobject.GoalDo">
+    update goal
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="goalName != null">
+        goal_name = #{goalName,jdbcType=VARCHAR},
+      </if>
+      <if test="reminderTime != null">
+        reminder_time = #{reminderTime,jdbcType=TIME},
+      </if>
+      <if test="isCompleted != null">
+        is_completed = #{isCompleted,jdbcType=BIT},
+      </if>
+    </set>
+    where goal_id = #{goalId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lwc.sportcommunity.dataobject.GoalDo">
+    update goal
+    set user_id = #{userId,jdbcType=INTEGER},
+      goal_name = #{goalName,jdbcType=VARCHAR},
+      reminder_time = #{reminderTime,jdbcType=TIME},
+      is_completed = #{isCompleted,jdbcType=BIT}
+    where goal_id = #{goalId,jdbcType=INTEGER}
+  </update>
+</mapper>

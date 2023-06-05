@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>知识库列表</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+		<style>
+			.mui-bar-popover {
+				width: 30%;
+			}
+		</style>
+	</head>
+
+	<body>
+		
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<ul class="mui-table-view mui-table-view-chevron"></ul>
+			</div>
+		</div>		
+		
+		
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack:true ,//启用右滑关闭功能，
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						style:'circle',
+						callback: pulldownRefresh
+					},
+					up: {
+						auto:true,
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
+			});
+			
+			var pageNum = 1;
+			var pageSize = 5;
+			var pageTotal = 10;
+			
+			function pullupRefresh() {
+				// console.log("1");
+				setTimeout(function() {
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh((pageNum >= pageTotal)); //参数为true代表没有更多数据了。
+					sendRequest();
+				}, 1500);
+			}
+			
+			function pulldownRefresh() {
+				// console.log(2);
+				setTimeout(function() {
+					if(pageNum > pageTotal){
+						app.showToast("已经是全部内容了","error");
+						
+					}else{
+						sendRequest();
+						mui.toast("为你推荐了5篇文章");
+					}
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh((pageNum > pageTotal));
+				}, 1500);
+			}
+			
+			function sendRequest(){
+				var user = app.getUserGlobalInfo();
+				mui.ajax(app.serverUrl + "/post/listAll", {
+					data: {
+						pageNum: pageNum,
+						pageSize: pageSize,
+						method: 1 ,
+						telephone: user.telephone
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					success: function(data) {
+						//服务器返回响应，根据响应结果，分析是否登录成功；
+						// console.log(JSON.stringify(data.data));
+				
+				
+						if (data.status == "success") {
+							pageTotal = data.data.totalPages;
+							// 登录或者注册成功之后，保存全局用户对象到本地缓
+							// app.showToast("查询成功", "success");
+							if(pageNum <= pageTotal){
+								showList(data.data.content);
+							}
+							pageNum++;
+							// 页面跳转
+							// mui.back();
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+			}
+			
+			function showList(list){
+				var card_list = document.getElementById("pullrefresh");
+				var post,card_html;
+				for(var i = 0; i < list.length; i++){
+					 post = list[i];
+					var content = "";
+					if(post.content.length <= 20){
+						content = post.content;
+					}else{
+						content = post.content.substring(1,20) + "...";
+					}
+					
+					var like_html = "";
+					if(post.isLiked == true){
+						// console.log(1);
+						like_html = '<a class="link_cancel" postId="'+ post.postId+'">' + post.likeCnt+ '赞' +'</a>' +
+									'<a class="link_like mui-hidden" postId="'+ post.postId+'">Like</a>';
+					}else{
+						// console.log(2);
+						like_html = '<a class="link_cancel mui-hidden" postId="'+ post.postId+'">' + (post.likeCnt + 1) + "赞" +'</a>' +
+									'<a class="link_like" postId="'+ post.postId+'">Like</a>';
+					}
+					 card_html = '<div class="mui-card mui-scroll" postId="'+ post.postId +'">' +
+						'<div class="mui-card-header mui-card-media">' +
+						'<img src="images/face-default.jpg" />' + 
+						'<div class="mui-media-body">' + 
+						post.nickname +
+						'<p>浏览量: ' +  post.viewCount + ' </p>' + 
+						'</div>' + 
+						'</div>' +
+						'<div class="mui-card-content" >' +
+						'<div class="mui-card-content-inner">' +
+						'	<b>' + post.title +'</b> ' +
+						'	<p>Posted on '+ post.createTime +'</p> ' +
+						'	<p style="color: #333;">' + content + '</p>' +
+						'</div>' +
+						'</div>' +
+						'<div class="mui-card-footer">' + 
+						like_html + 
+						
+						'<a class="link_more" postId="' + post.postId+ '" zan="0">Read more</a>'+
+						'</div>'+
+						'</div>';
+						card_list.insertAdjacentHTML("beforeend", card_html);
+				}
+			}
+			
+			mui.plusReady(function(){	
+				
+				mui('#pullrefresh').on("tap",".link_more",function(){
+					var postId = this.getAttribute("postId");
+					// console.log(postId);
+					mui.openWindow({
+						url: 'post-detail.html',
+						id: 'post-detail.html',
+						extras:{
+							postId: postId
+						}
+					});
+				});
+				
+				mui('#pullrefresh').on("tap", ".link_like",function(){
+					var postId = this.getAttribute("postId");
+					var user = app.getUserGlobalInfo();
+					var that = this;
+					mui.ajax(app.serverUrl + "/like/create", {
+						data: {
+							telephone: user.telephone,
+							postId: postId
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							// console.log(JSON.stringify(data));
+					
+					
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓存
+								that.classList.add("mui-hidden");
+								var link_cancel = that.previousElementSibling;
+								link_cancel.classList.remove("mui-hidden");
+								// console.log(link_cancel);
+								app.showToast("成功点赞", "success");
+								
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+				});
+			
+				mui('#pullrefresh').on("tap",".link_cancel",function(){
+					var postId = this.getAttribute("postId");
+					var user = app.getUserGlobalInfo();
+					var that = this;
+					
+					mui.ajax(app.serverUrl + "/like/delete", {
+						data: {
+							telephone: user.telephone,
+							postId: postId
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							// console.log(JSON.stringify(data));
+					
+					
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓存
+								that.classList.add("mui-hidden");
+								var link_like = that.nextElementSibling;
+								link_like.classList.remove("mui-hidden");
+								// console.log(link_cancel);
+								app.showToast("取消点赞", "success");
+								
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+					
+					
+				});
+			});
+			
+			
+			
+		</script>
+	</body>
+
+</html>

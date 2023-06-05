@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<p id="desc"></p>
+			</div>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#" id="event">报名中的活动</a>
+					<div class="mui-collapse-content" id="event_list">
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#" id="all_event">全部活动</a>
+					<div class="mui-collapse-content" id="all_event_list">
+					</div>
+				</li>
+			</ul>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+				var current = plus.webview.currentWebview();
+				var clubId = current.clubId;
+				var clubName = current.clubName;
+				mui.ajax(app.serverUrl + "/club/look", {
+					data: {
+						clubId: clubId
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						if (data.status == "success") {
+							var desc = document.getElementById("desc");
+							desc.innerText = data.data.clubDesc;
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+				
+				
+				mui('#event_list').on("tap",".event",function(){
+					var eventId = this.getAttribute("eventId");
+					// console.log(eventId);
+					mui.openWindow({
+						url: 'event_detail.html',
+						id: 'event_detail.html',
+						extras:{
+							eventId: eventId
+						}
+					});
+				});
+				
+				
+				mui('#all_event_list').on("tap",".all-event",function(){
+					var eventId = this.getAttribute("eventId");
+					// console.log(eventId);
+					mui.openWindow({
+						url: 'event_detail.html',
+						id: 'event_detail.html',
+						extras:{
+							eventId: eventId
+						}
+					});
+				});
+				
+				
+				var event = document.getElementById("event");
+				var event_flag = false;
+				event.addEventListener("tap", function(){
+					if(!event_flag){
+						mui.ajax(app.serverUrl + "/event/listNow", {
+							data: {
+								"clubId": clubId
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									var list = document.getElementById("event_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class="mui-navigate-right event" eventId="'+ comment.eventId+'">' +
+																comment.eventName +
+															'</a>' +
+															'</li>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						join_flag = true;
+					}else{
+						// console.log("else");
+						join_flag = false;
+					}
+					
+				});
+			
+			
+				var all_event = document.getElementById("all_event");
+				var all_event_flag = false;
+				all_event.addEventListener("tap", function(){
+					if(!all_event_flag){
+						mui.ajax(app.serverUrl + "/event/list", {
+							data: {
+								"clubId": clubId
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								// console.log(JSON.stringify(data));
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									
+									var list = document.getElementById("all_event_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class="mui-navigate-right all-event" eventId="'+ comment.eventId+'">' +
+																comment.eventName +
+															'</a>' +
+															'</li>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						all_event_flag = true;
+					}else{
+						// console.log("else");
+						all_event_flag = false;
+					}
+					
+				});
+			
+			});
+		</script>
+	</body>
+
+</html>

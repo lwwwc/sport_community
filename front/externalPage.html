@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color" id="title">运动检测开启</h1>
+		</header>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			mui.plusReady(function(){
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap",function(){
+					mui.back();
+					var showWebview = plus.webview.getWebviewById("sport_detection.html");
+					showWebview.evalJS("showInfo()");
+				});
+				
+				var ws = plus.webview.currentWebview();
+				var user = app.getUserGlobalInfo();
+				var urls = app.sportCodeUrl + "&state=" + user.id;
+				// console.log(urls);
+				var embed = plus.webview.create(urls,'embed',{top: "44px"});
+				ws.append(embed);
+				embed.addEventListener("loading",function(){
+					plus.nativeUI.showWaiting('',{style:'black',modal:false,background:'rgba(0,0,0,0)'});
+				},false);
+				embed.addEventListener("loaded",function(){
+					plus.nativeUI.closeWaiting();
+				});
+			});
+		</script>
+	</body>
+
+</html>

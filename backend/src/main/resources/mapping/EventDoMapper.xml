@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lwc.sportcommunity.dao.EventDoMapper">
+  <resultMap id="BaseResultMap" type="com.lwc.sportcommunity.dataobject.EventDo">
+    <constructor>
+      <idArg column="event_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="event_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="event_datetime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="location" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="club_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    </constructor>
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.lwc.sportcommunity.dataobject.EventDo">
+    <constructor>
+      <idArg column="event_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="event_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="event_datetime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="location" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="club_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="event_desc" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    event_id, event_name, event_datetime, location, club_id, user_id
+  </sql>
+  <sql id="Blob_Column_List">
+    event_desc
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from events
+    where event_id = #{eventId,jdbcType=INTEGER}
+  </select>
+  <select id="selectAllByClubId" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select *
+    from events
+    where club_id = #{clubId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from events
+    where event_id = #{eventId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lwc.sportcommunity.dataobject.EventDo">
+    insert into events (event_id, event_name, event_datetime, 
+      location, club_id, user_id, 
+      event_desc)
+    values (#{eventId,jdbcType=INTEGER}, #{eventName,jdbcType=VARCHAR}, #{eventDatetime,jdbcType=TIMESTAMP}, 
+      #{location,jdbcType=VARCHAR}, #{clubId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, 
+      #{eventDesc,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lwc.sportcommunity.dataobject.EventDo">
+    insert into events
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="eventId != null">
+        event_id,
+      </if>
+      <if test="eventName != null">
+        event_name,
+      </if>
+      <if test="eventDatetime != null">
+        event_datetime,
+      </if>
+      <if test="location != null">
+        location,
+      </if>
+      <if test="clubId != null">
+        club_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="eventDesc != null">
+        event_desc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="eventId != null">
+        #{eventId,jdbcType=INTEGER},
+      </if>
+      <if test="eventName != null">
+        #{eventName,jdbcType=VARCHAR},
+      </if>
+      <if test="eventDatetime != null">
+        #{eventDatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="location != null">
+        #{location,jdbcType=VARCHAR},
+      </if>
+      <if test="clubId != null">
+        #{clubId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="eventDesc != null">
+        #{eventDesc,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lwc.sportcommunity.dataobject.EventDo">
+    update events
+    <set>
+      <if test="eventName != null">
+        event_name = #{eventName,jdbcType=VARCHAR},
+      </if>
+      <if test="eventDatetime != null">
+        event_datetime = #{eventDatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="location != null">
+        location = #{location,jdbcType=VARCHAR},
+      </if>
+      <if test="clubId != null">
+        club_id = #{clubId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="eventDesc != null">
+        event_desc = #{eventDesc,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where event_id = #{eventId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.lwc.sportcommunity.dataobject.EventDo">
+    update events
+    set event_name = #{eventName,jdbcType=VARCHAR},
+      event_datetime = #{eventDatetime,jdbcType=TIMESTAMP},
+      location = #{location,jdbcType=VARCHAR},
+      club_id = #{clubId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      event_desc = #{eventDesc,jdbcType=LONGVARCHAR}
+    where event_id = #{eventId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lwc.sportcommunity.dataobject.EventDo">
+    update events
+    set event_name = #{eventName,jdbcType=VARCHAR},
+      event_datetime = #{eventDatetime,jdbcType=TIMESTAMP},
+      location = #{location,jdbcType=VARCHAR},
+      club_id = #{clubId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER}
+    where event_id = #{eventId,jdbcType=INTEGER}
+  </update>
+</mapper>

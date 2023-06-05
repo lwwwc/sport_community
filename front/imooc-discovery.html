@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<ul class="mui-table-view">
+				<li  class="mui-table-view-cell">
+					<a id="paper" class="mui-navigate-right">
+						运动知识库
+					</a>
+				</li>
+				<li  class="mui-table-view-cell">
+					<a id="reminder" class="mui-navigate-right">
+						每日目标设置及提醒
+					</a>
+				</li>
+				<li  class="mui-table-view-cell">
+					<a id="sport_detection" class="mui-navigate-right">
+						运动检测
+					</a>
+				</li>
+			</ul>
+		</div>
+		
+	
+		<script src="js/mui.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+				var btn = document.getElementById("paper");
+				btn.addEventListener("tap",function(){
+					mui.openWindow("post-index.html","post-index.html");
+				});
+				var reminder = document.getElementById("reminder");
+				reminder.addEventListener("tap", function(){
+					mui.openWindow("reminder.html","reminder.html");
+				});
+				var sport_detection = document.getElementById("sport_detection");
+				sport_detection.addEventListener("tap",function(){
+					mui.openWindow("sport_detection.html","sport_detection.html");
+				});
+			});
+		</script>
+	</body>
+
+</html>

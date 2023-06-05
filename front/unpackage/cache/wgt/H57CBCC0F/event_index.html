@@ -1,0 +1,264 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color" id="title"></h1>
+			<span id="link_add" class="mui-pull-right mui-icon mui-icon mui-icon-plusempty"></span>
+		</header>
+		
+		<nav class="mui-bar mui-bar-tab ">
+			<a class="mui-tab-item mui-active" tabindex="0">首页</a>
+			<a class="mui-tab-item" tabindex="1">群聊</a>
+			<a class="mui-tab-item" tabindex="2">我的</a>
+		</nav>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			
+			var muxinStyle = {
+				top: "44px",
+				bottom: "50px"
+			};
+			
+			var clubId;
+			var clubName;
+			
+			mui.init();
+			
+			// 构建聊天业务CHAT
+			window.CHAT = {
+				socket: null,
+				init: function() {
+					if (window.WebSocket) {
+						// 如果当前的状态已经连接，那就不需要重复初始化websocket
+						if (CHAT.socket != null 
+							&& CHAT.socket != undefined 
+							&& CHAT.socket.readyState == WebSocket.OPEN) {
+							return false;
+						}
+						CHAT.socket = new WebSocket(app.nettyServerUrl);
+						CHAT.socket.onopen = CHAT.wsopen,
+						CHAT.socket.onclose = CHAT.wsclose,
+						CHAT.socket.onerror = CHAT.wserror,
+						CHAT.socket.onmessage = CHAT.wsmessage;
+					} else {
+						alert("手机设备过旧，请升级手机设备...");
+					}
+				},
+				chat: function(msg) {
+					// 如果当前websocket的状态是已打开，则直接发送， 否则重连
+					if (CHAT.socket != null 
+							&& CHAT.socket != undefined  
+							&& CHAT.socket.readyState == WebSocket.OPEN) {
+							CHAT.socket.send(msg);
+					} else {
+						// 重连websocket
+						CHAT.init();
+						setTimeout("CHAT.reChat('" + msg + "')", "1000");
+					}
+				},
+				reChat: function(msg) {
+					console.log("消息重新发送...");
+					CHAT.socket.send(msg);
+				},
+				wsopen: function() {
+					console.log("websocket连接已建立...");
+					
+					var me = app.getUserGlobalInfo();
+					// // 构建ChatMsg
+					var chatMsg = new app.ChatMsg(me.id, clubId, null, null);
+					// // 构建DataContent
+					var dataContent = new app.DataContent(app.CONNECT, chatMsg);
+					// // 发送websocket
+					CHAT.chat(JSON.stringify(dataContent));
+					
+					// 每次连接之后，获取用户的未读未签收消息列表
+					fetchUnReadMsg();
+					
+					// 定时发送心跳
+					setInterval("CHAT.keepalive()", 10000);
+				},
+				wsmessage: function(e) {
+					// console.log("接受到消息：" + e.data);
+					
+					// 转换DataContent为对象
+					var dataContent = JSON.parse(e.data);
+					var action = dataContent.action;
+					var me = app.getUserGlobalInfo();
+					
+					// 如果不是重新拉取好友列表，则获取聊天消息模型，渲染接收到的聊天记录
+					var chatMsg = dataContent.chatMsg;
+					var msg = chatMsg.msg;
+					var clubId = chatMsg.clubId;
+					var userId = chatMsg.userId;
+					var msgId = chatMsg.msgId;
+					
+					if(action == 3){
+						app.saveUserChatHistory(userId, clubId, msg, msgId, 1);
+					}else if(action == 2){
+						// 调用聊天webview的receiveMsg方法
+						app.saveUserChatHistory(userId, clubId, msg, msgId, 2);
+						var chatWebview = plus.webview.getWebviewById("chatting-"+ me.id +"-"+clubId);
+						// var isRead = true;	// 设置消息的默认状态为已读
+						if (chatWebview != null) {
+							chatWebview.evalJS("receiveMsg('" + msg +"','" + userId +"')");
+							chatWebview.evalJS("resizeScreen()");
+						} 
+					}
+				},
+				wsclose: function() {
+					console.log("连接关闭...");
+				},
+				wserror: function() {
+					console.log("发生错误...");
+				},
+
+				keepalive: function() {
+					// 构建对象
+					var dataContent = new app.DataContent(app.KEEPALIVE, null);
+					// 发送心跳
+					CHAT.chat(JSON.stringify(dataContent));
+					
+					// 定时执行函数
+					fetchUnReadMsg();
+					// fetchContactList();
+				}
+			};
+				
+			mui.plusReady(function(){
+				var current = plus.webview.currentWebview();
+				clubId = current.clubId;
+				clubName = current.clubName;
+				var title = document.getElementById("title");
+				title.innerText = clubName;
+				var me = app.getUserGlobalInfo();
+				var postArray = [
+					{
+						pageId: "event_list.html",
+						pageUrl: "event_list.html"
+					},{
+						pageId: "chatting-"+ me.id +"-"+clubId,
+						pageUrl: "chatting.html"
+					},
+					{
+						pageId: "event_my.html",
+						pageUrl: "event_my.html"
+					}
+				];
+				
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap", function(){
+					mui.back();
+				});
+				
+				var link_add = document.getElementById("link_add");
+				link_add.addEventListener("tap", function(){
+					mui.openWindow({
+						url: 'event_add.html',
+						id: 'event_add.html',
+						extras:{
+							clubId: clubId
+						}
+					});
+				});
+				
+				
+				var indexWebView = plus.webview.currentWebview();
+				
+				for(var i = 0; i < postArray.length; i++){
+					var muxinPage = plus.webview.create(postArray[i].pageUrl,
+														postArray[i].pageId,
+														muxinStyle,
+														{clubId: clubId,
+														clubName: clubName});
+					muxinPage.hide();
+					indexWebView.append(muxinPage);
+				}
+				plus.webview.show(postArray[0].pageId);
+				mui(".mui-bar-tab").on("tap", "a", function(e){
+					var tableIndex = this.getAttribute("tabindex");
+					plus.webview.show(postArray[tableIndex].pageId, "fade-in", 200);
+					// console.log(tableIndex);
+						
+					for(var i = 0; i < postArray.length; i++){
+						if(i != tableIndex){
+							plus.webview.hide(postArray[i].pageId, "fade-out", 200);
+						}
+					}
+					// e.preventDefault();
+				});
+				
+				
+				window.addEventListener("refresh", function(){
+					CHAT.init();
+				});
+				CHAT.init();
+				
+				
+			});
+		
+			// 每次重连后获取服务器的未签收消息
+			function fetchUnReadMsg() {
+				var user = app.getUserGlobalInfo();
+				var clubChatHistory = app.getUserChatHistory(user.id, clubId);
+				mui.ajax(app.serverUrl + "/chat/getUnReadMsgList", {
+					data: {
+						msgId: clubChatHistory.msgId,
+						clubId: clubId
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						//服务器返回响应，根据响应结果，分析是否登录成功；
+						// console.log(JSON.stringify(data));
+						if (data.status == "success") {
+							var unReadMsgList = data.data;	
+							// 1. 保存聊天记录到本地
+							// 2. 保存聊天快照到本地
+							// 3. 对这些未签收的消息，批量签收
+							for (var i = 0 ; i < unReadMsgList.length ; i ++) {
+								var msgObj = unReadMsgList[i];
+								// 逐条存入聊天记录
+								//Todo 拉取的都是别人的消息会不会有问题 加入自己发送后未更新msgId
+								if(user.id == msgObj.userId){
+									app.saveUserChatHistory(msgObj.userId,
+															msgObj.clubId, 
+															msgObj.content,
+															msgObj.chatId,
+															 1);
+								}else{
+									app.saveUserChatHistory(msgObj.userId,
+															msgObj.clubId, 
+															msgObj.content,
+															msgObj.chatId,
+															 2);
+								}
+							}
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+				
+				var pageId = "chatting-"+ user.id +"-"+clubId;
+				var myfaceWebview = plus.webview.getWebviewById(pageId);
+				mui.fire(myfaceWebview, "refresh");
+			}
+		</script>
+	</body>
+
+</html>

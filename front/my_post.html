@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<!--下拉刷新容器-->
+		<div  class="mui-content mui-scroll-wrapper">
+			<div  class="mui-scroll">
+				<!--数据列表-->
+				<ul id="pullrefresh" class="mui-table-view mui-table-view-chevron"></ul>
+			</div>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack:true ,//启用右滑关闭功能，
+			});
+
+			mui.plusReady(function(){
+				mui('.mui-scroll-wrapper').scroll({});  
+				
+				var current = plus.webview.currentWebview();
+				current.addEventListener("show", function(){
+					var list = document.getElementById("pullrefresh");
+					list.innerHTML = "";
+					sendRequest();
+				});
+				
+				mui('#pullrefresh').on("tap",".link_delete",function(){
+					var postId = this.getAttribute("postId");
+					var user = app.getUserGlobalInfo();
+					var btnArray = ["是","否"];
+					
+					mui.confirm('是否确认删除该文章？', '', btnArray, function(e) {
+						if (e.index == 1) {
+							return;
+						} else {
+							var list = document.getElementById("pullrefresh");
+							
+							mui.ajax(app.serverUrl + "/post/delete", {
+								data: {
+									"telephone": user.telephone,
+									"postId": postId
+								},
+								dataType: 'json', //服务器返回json格式数据
+								type: 'post', //HTTP请求类型
+								timeout: 10000, //超时时间设置为10秒；
+								headers: {
+									'Content-Type': 'application/x-www-form-urlencoded'
+								},
+								success: function(data) {
+									//服务器返回响应，根据响应结果，分析是否登录成功；
+									// console.log(JSON.stringify(data.data));
+							
+							
+									if (data.status == "success") {
+								
+										// 登录或者注册成功之后，保存全局用户对象到本地缓
+										app.showToast("删除成功", "success");
+										mui.refresh();
+									
+										// showList(data.data);
+									
+										// 页面跳转
+										// mui.back();
+									} else {
+										app.showToast(data.data.errMsg, "error");
+									}
+								}
+							});
+							
+							list.innerHTML = "";
+							sendRequest();
+						}
+					})
+					
+					
+					
+				})
+				
+				mui('#pullrefresh').on("tap",".link_update",function(){
+					var postId = this.getAttribute("postId");
+					mui.openWindow({
+						url: 'update-post.html',
+						id: 'update-post.html',
+						extras:{
+							postId: postId
+						}
+					});
+				});
+				mui('#pullrefresh').on("tap",".link_more",function(){
+					var postId = this.getAttribute("postId");
+					// console.log(postId);
+					mui.openWindow({
+						url: 'post-detail.html',
+						id: 'post-detail.html',
+						extras:{
+							postId: postId
+						}
+					});
+				});
+				
+			});
+			
+			function sendRequest(){
+				var user = app.getUserGlobalInfo();
+				mui.ajax(app.serverUrl + "/post/listMyPost", {
+					data: {
+						"telephone": user.telephone
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						//服务器返回响应，根据响应结果，分析是否登录成功；
+						// console.log(JSON.stringify(data.data));
+				
+				
+						if (data.status == "success") {
+					
+							// 登录或者注册成功之后，保存全局用户对象到本地缓
+							// app.showToast("查询成功", "success");
+						
+							showList(data.data);
+						
+							// 页面跳转
+							// mui.back();
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+			}
+			
+			function showList(list){
+				var card_list = document.getElementById("pullrefresh");
+				var post,card_html;
+				for(var i = 0; i < list.length; i++){
+					 post = list[i];
+					var content = "";
+					if(post.content.length <= 20){
+						content = post.content;
+					}else{
+						content = post.content.substring(1,20) + "...";
+					}
+					var user = app.getUserGlobalInfo();
+					 card_html = '<div class="mui-card" postId="'+ post.id +'">' +
+						'<div class="mui-card-header mui-card-media">' +
+						'<img src="images/face-default.jpg" />' + 
+						'<div class="mui-media-body">' + 
+						user.name +
+						'<p>浏览量: ' +  post.viewCount + ' </p>' + 
+						'</div>' + 
+						'</div>' +
+						'<div class="mui-card-content" >' +
+						'<div class="mui-card-content-inner">' +
+						'	<b>' + post.title +'</b> ' +
+						'	<p>Posted on '+ post.createTime +'</p> ' +
+						'	<p style="color: #333;">' + content + '</p>' +
+						'</div>' +
+						'</div>' +
+						'<div class="mui-card-footer">' + 
+						'<a class="link_update" postId="'+ post.id+'">Update</a>' +
+						'<a class="link_delete" postId="'+ post.id +'">Delete</a>' + 
+						'<a class="link_more" postId="'+  post.id +'">Read more</a>'+
+						'</div>'+
+						'</div>';
+						card_list.insertAdjacentHTML("beforeend", card_html);
+				}
+			}
+		</script>
+	</body>
+
+</html>

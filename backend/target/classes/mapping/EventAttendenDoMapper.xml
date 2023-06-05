@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lwc.sportcommunity.dao.EventAttendenDoMapper">
+  <resultMap id="BaseResultMap" type="com.lwc.sportcommunity.dataobject.EventAttendenDo">
+    <constructor>
+      <idArg column="join_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="event_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="check_in_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="rating" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    join_id, event_id, user_id, check_in_time, rating
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from event_attendens
+    where join_id = #{joinId,jdbcType=INTEGER}
+  </select>
+  <select id="selectByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from event_attendens
+    where user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  <select id="selectAttend" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from event_attendens
+    where event_id = #{eventId,jdbcType=INTEGER}
+    and check_in_time is not null
+  </select>
+  <select id="selectByEventIdAndUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select *
+    from event_attendens
+    where event_id = #{eventId,jdbcType=INTEGER}
+    and user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from event_attendens
+    where join_id = #{joinId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lwc.sportcommunity.dataobject.EventAttendenDo">
+    insert into event_attendens (join_id, event_id, user_id, 
+      check_in_time, rating)
+    values (#{joinId,jdbcType=INTEGER}, #{eventId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, 
+      #{checkInTime,jdbcType=TIMESTAMP}, #{rating,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lwc.sportcommunity.dataobject.EventAttendenDo">
+    insert into event_attendens
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="joinId != null">
+        join_id,
+      </if>
+      <if test="eventId != null">
+        event_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="checkInTime != null">
+        check_in_time,
+      </if>
+      <if test="rating != null">
+        rating,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="joinId != null">
+        #{joinId,jdbcType=INTEGER},
+      </if>
+      <if test="eventId != null">
+        #{eventId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="checkInTime != null">
+        #{checkInTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rating != null">
+        #{rating,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lwc.sportcommunity.dataobject.EventAttendenDo">
+    update event_attendens
+    <set>
+      <if test="eventId != null">
+        event_id = #{eventId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="checkInTime != null">
+        check_in_time = #{checkInTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rating != null">
+        rating = #{rating,jdbcType=INTEGER},
+      </if>
+    </set>
+    where join_id = #{joinId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lwc.sportcommunity.dataobject.EventAttendenDo">
+    update event_attendens
+    set event_id = #{eventId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      check_in_time = #{checkInTime,jdbcType=TIMESTAMP},
+      rating = #{rating,jdbcType=INTEGER}
+    where join_id = #{joinId,jdbcType=INTEGER}
+  </update>
+</mapper>

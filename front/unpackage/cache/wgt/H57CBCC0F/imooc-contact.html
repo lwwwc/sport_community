@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+	<div class="mui-content">
+		<div class="mui-slider" style="height: 200px;">
+		  <div class="mui-slider-group mui-slider-loop">
+			<div class="mui-slider-item mui-slider-item-duplicate"><a href="#"><img src="images/4.jpg" /></a></div>
+		    <div class="mui-slider-item"><a href="#"><img  src="images/1.jpg" /></a></div>
+		    <div class="mui-slider-item"><a href="#"><img  src="images/2.jpg" /></a></div>
+		    <div class="mui-slider-item"><a href="#"><img  src="images/3.jpg" /></a></div>
+		    <div class="mui-slider-item"><a href="#"><img  src="images/4.jpg" /></a></div>
+			<div class="mui-slider-item mui-slider-item-duplicate"><a href="#"><img src="images/1.jpg" /></a></div>
+		  </div>
+		</div>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell mui-collapse">
+				<a class="mui-navigate-right" href="#">创建或添加俱乐部</a>
+				<div class="mui-collapse-content">
+					<form class="mui-input-group">
+						<div class="mui-input-row">
+							<label>俱乐部号</label>
+							<input id="txt_club" type="text" placeholder="请输入你要添加的俱乐部号">
+						</div>
+	
+						<div class="mui-button-row">
+							<button id="join_btn" class="mui-btn mui-btn-primary" type="button" onclick="return false;">添加</button>&nbsp;&nbsp;
+							<button id="create_btn" class="mui-btn mui-btn-primary" type="button" onclick="return false;">创建</button>
+						</div>
+					</form>
+				</div>
+			</li>
+		</ul>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell mui-collapse">
+				<a class="mui-navigate-right" href="#" id="join_club">我已加入的俱乐部</a>
+				<div class="mui-collapse-content" id="join_club_list">
+		
+				</div>
+			</li>
+		</ul>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell mui-collapse">
+				<a class="mui-navigate-right" href="#" id="all_club">展示所有俱乐部</a>
+				<div class="mui-collapse-content" id="all_club_list">
+				</div>
+			</li>
+		</ul>
+			
+		</div>
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			mui.plusReady(function(){
+				
+				mui('#all_club_list').on("tap",".all-club",function(){
+					var clubId = this.getAttribute("clubId");
+					// console.log(clubId);
+					mui.openWindow({
+						url: 'club_detail.html',
+						id: 'club_detail.html',
+						extras:{
+							clubId: clubId
+						}
+					});
+				});
+				
+				mui('#join_club_list').on("tap",".club",function(){
+					var clubId = this.getAttribute("clubId");
+					var clubName = this.getAttribute("clubName");
+					// console.log(clubId);
+					mui.openWindow({
+						url: 'event_index.html',
+						id: 'event_index.html',
+						extras:{
+							clubId: clubId,
+							clubName: clubName
+						}
+					});
+				});
+				
+				var create_btn = document.getElementById("create_btn");
+				create_btn.addEventListener("tap", function(){
+					mui.openWindow("add_club.html","add_club.html");
+				});
+				
+				//加入俱乐部
+				var join_btn = document.getElementById("join_btn");
+				join_btn.addEventListener("tap", function(){
+					var txt_club = document.getElementById("txt_club");
+					if(!app.isNotNull(txt_club.value)){
+						app.showToast("俱乐部号不能为空", "error");
+						return false;
+					}
+					var btnArray = ["是","否"];
+					mui.ajax(app.serverUrl + "/club/look", {
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						data:{
+							clubId: txt_club.value
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							// console.log(JSON.stringify(data));
+							if (data.status == "success") {
+								// 登录或者注册成功之后，保存全局用户对象到本地缓
+								var club_content = "是否加入以下俱乐部:" + data.data.clubName + "[" + data.data.clubDesc+ "]";
+								// console.log(club_content);
+								mui.confirm(club_content, '添加俱乐部', btnArray, function(e) {
+									if (e.index == 1) {
+										return;
+									} else {
+										var user = app.getUserGlobalInfo();
+										mui.ajax(app.serverUrl + "/club/join", {
+											data: {
+												"telephone": user.telephone,
+												"clubId": txt_club.value
+											},
+											dataType: 'json', //服务器返回json格式数据
+											type: 'post', //HTTP请求类型
+											timeout: 10000, //超时时间设置为10秒；
+											headers: {
+												'Content-Type': 'application/x-www-form-urlencoded'
+											},
+											success: function(data) {
+												if (data.status == "success") {
+													// 登录或者注册成功之后，保存全局用户对象到本地缓
+													app.showToast("加入成功", "success");
+												} else {
+													app.showToast(data.data.errMsg, "error");
+												}
+											}
+										});
+									}
+								});
+							} else {
+								app.showToast(data.data.errMsg, "error");
+							}
+						}
+					});
+				});
+				
+				//获得slider插件对象
+				var gallery = mui('.mui-slider');
+				gallery.slider({
+				  interval:5000//自动轮播周期，若为0则不自动播放，默认为0；
+				});
+				
+				//已经加入的俱乐部
+				var join_club = document.getElementById("join_club");
+				var join_flag = false;
+				join_club.addEventListener("tap", function(){
+					if(!join_flag){
+						var user = app.getUserGlobalInfo();
+						mui.ajax(app.serverUrl + "/club/listMyClub", {
+							data: {
+								"telephone": user.telephone
+							},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								// console.log(JSON.stringify(data));
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									// app.showToast("查询成功", "success");
+									var list = document.getElementById("join_club_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class="mui-navigate-right club" clubName="'+comment.clubName+'" clubId="'+ comment.clubId+'">' +
+																comment.clubName +
+															'</a>' +
+															'</li>';
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						join_flag = true;
+					}else{
+						// console.log("else");
+						join_flag = false;
+					}
+					
+				});
+				
+				var all_club = document.getElementById("all_club");
+				var all_flag = false;
+				all_club.addEventListener("tap",function(){
+					if(!all_flag){
+						var user = app.getUserGlobalInfo();
+						mui.ajax(app.serverUrl + "/club/list", {
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								// console.log(JSON.stringify(data));
+								if (data.status == "success") {
+									// 登录或者注册成功之后，保存全局用户对象到本地缓
+									// app.showToast("查询成功", "success");
+									var list = document.getElementById("all_club_list");
+									list.innerHTML = "";
+									for(var i = 0; i < data.data.length; i++){
+										var comment = data.data[i];
+										// var comment_html = '<p>' + comment.clubName + '</p>';
+										var comment_html = 	'<li class="mui-table-view-cell">' +
+															'<a class="mui-navigate-right all-club" clubId="'+ comment.clubId +'">' +
+																comment.clubName +
+															'</a>' +
+															'</li>';
+									
+										list.insertAdjacentHTML("beforeend", comment_html);
+									}
+								} else {
+									app.showToast(data.data.errMsg, "error");
+								}
+							}
+						});
+						all_flag = true;
+					}else{
+						// console.log("else");
+						all_flag = false;
+					}
+				});
+			
+			});
+		</script>
+	</body>
+
+</html>

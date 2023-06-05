@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_myface" href="javascript:;">
+						<span  class="mui-pull-right mui-icon mui-icon-arrowright" 
+								style="line-height: 42px;color: lightgray; margin-left: 3px;"></span>
+						<img id="img_my_face" class="mui-media-object mui-pull-right" src="images/face-default.jpg">
+						<div class="mui-media-body" style="line-height: 42px; font-size: 16px;">
+							头像
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_name" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright"
+								style="color: lightgray; margin-left: 3px;"></span>
+						<span id="span_name" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+							昵称
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="javascript:;">
+						<span id="span_telephone" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+						    手机号
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_gender" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright"
+								style="color: lightgray; margin-left: 3px;"></span>
+						<span id="span_gender" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+						    性别
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_age" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright"
+								style="color: lightgray; margin-left: 3px;"></span>
+						<span id="span_age" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+						    年龄
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_signature" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright"
+								style="color: lightgray; margin-left: 3px;"></span>
+						<span id="span_signature" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+						    个性签名
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a id="link_password" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright"
+								style="color: lightgray; margin-left: 3px;"></span>
+						<span id="span_signature" class="mui-pull-right"
+							style="color: gray; font-size: 14px;"></span>
+						<div class="mui-media-body">
+						    修改密码
+						</div>
+					</a>
+				</li>
+				<!-- <li class="mui-table-view-cell mui-media">
+					<a id="link_my_qrcode" href="javascript:;">
+						<span class="mui-pull-right mui-icon mui-icon-arrowright" style="color: lightgray;margin-left: 3px;"></span>
+						<img class="mui-media-object mui-pull-right" src="images/qrcode.png" style="max-width: 20px;height: 20px;">
+						<div class="mui-media-body">
+							我的二维码
+						</div>
+					</a>
+				</li> -->
+			</ul>
+			<br>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-media" 
+				style="text-align: center;">
+					<a id="link_logout" href="javascript:;">
+						<div class="mui-media-body">
+						    退出登录
+						</div>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<script src="js/app.js"></script>
+		<script src="js/mui.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			mui.plusReady(function(){
+				
+				//获得当前的webview，刷新当前用户信息
+				var meWebView = plus.webview.currentWebview();
+				meWebView.addEventListener("show", function(){
+					refreshUserInfo();
+				});
+				
+				//页面跳转 我的头像
+				var link_myface = document.getElementById("link_myface");
+				link_myface.addEventListener("tap", function(){
+					mui.openWindow("myface.html", "myface.html");
+				});
+				
+				// 用户退出
+				var link_logout = document.getElementById("link_logout");
+					link_logout.addEventListener("tap", function() {
+					app.userLogout();
+					mui.openWindow("login.html", "login.html");
+				});
+				
+				//修改昵称
+				var link_name = document.getElementById("link_name");
+				link_name.addEventListener("tap", function(){
+					mui.openWindow("update-name.html","update-name.html");
+				});
+				
+				//修改个性签名
+				var link_signature = document.getElementById("link_signature");
+				link_signature.addEventListener("tap", function(){
+					mui.openWindow("update-signature.html","update-signature.html");
+				});
+				
+				//修改年龄
+				var link_age = document.getElementById("link_age");
+				link_age.addEventListener("tap",function(){
+					mui.openWindow("update-age.html","update-age.html");
+				});
+				
+				//修改性别
+				var link_gender = document.getElementById("link_gender");
+				link_gender.addEventListener("tap",function(){
+					mui.openWindow("update-gender.html","update-gender.html");
+				});
+				
+				//修改密码
+				var link_password = document.getElementById("link_password");
+				link_password.addEventListener("tap", function(e){
+					mui.openWindow("update-password.html","update-password.html");
+				});
+				
+				
+				
+				
+			
+			});
+			
+			function refreshUserInfo(){
+				var gender_list = ["女","男"];
+				
+				var user = app.getUserGlobalInfo();
+				var faceImage = user.faceImage;
+				var name = user.name;
+				var telephone = user.telephone;
+				var gender = user.gender == -1 ? "保密" : gender_list[user.gender];
+				var age = user.age;
+				var signature = user.signature;
+				
+				
+				
+				
+				var span_name = document.getElementById("span_name");
+				var span_telephone = document.getElementById("span_telephone");
+				var span_gender = document.getElementById("span_gender");
+				var span_age = document.getElementById("span_age");
+				var span_signature = document.getElementById("span_signature");
+				
+				
+				span_name.innerHTML = name;
+				span_telephone.innerHTML = telephone;
+				span_age.innerHTML = age;
+				span_signature.innerHTML = signature;
+				span_gender.innerHTML = gender;
+				
+				
+				if(app.isNotNull(faceImage)){
+					var img_my_face = document.getElementById("img_my_face");
+					img_my_face.src = app.imgServerUrl + faceImage;
+				}
+				
+			}
+		</script>
+	</body>
+
+</html>

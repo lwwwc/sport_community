@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+  <title>分页示例</title>
+  <link rel="stylesheet" href="//cdn.bootcss.com/mui/3.7.1/css/mui.min.css">
+  <script src="//cdn.bootcss.com/mui/3.7.1/js/mui.min.js"></script>
+  <script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+</head>
+
+<body>
+  <header class="mui-bar mui-bar-nav">
+    <h1 class="mui-title">分页示例</h1>
+  </header>
+
+  <div class="mui-content">
+    <ul id="list" class="mui-table-view">
+
+    </ul>
+    <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+      <div class="mui-scroll">
+        <div id="scroll" class="mui-loading">
+          加载中...
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="js/app.js"></script>
+  <script>
+    var pageSize = 10; //每页显示的数据量
+    var pageNum = 1; //当前页码
+    var isLoading = false; //是否正在加载数据
+    var listEl = document.getElementById("list");
+
+    function loadData() {
+      //构造请求参数
+      var params = {
+        pageNum: pageNum,
+        pageSize: pageSize,
+		method: 0
+      };
+      //发起ajax请求获取数据
+      $.ajax({
+        type: 'post',
+        url: app.serverUrl+"/post/listAll",
+        data: params,
+        dataType: 'json',
+		success: function(data) {
+			//服务器返回响应，根据响应结果，分析是否登录成功；
+			console.log(JSON.stringify(data.data));
+						
+						
+			if (data.status == "success") {
+				// 登录或者注册成功之后，保存全局用户对象到本地缓
+				app.showToast("查询成功", "success");
+				//数据请求成功，渲染数据
+				var data = data.data;
+				var html = '';
+				for (var i = 0; i < data.length; i++) {
+				  var item = data[i];
+				  html += '<li class="mui-table-view-cell">' + item.title + '</li>';
+				}
+				if (pageIndex === 1) {
+				  listEl.html(html);
+				} else {
+				  listEl.append(html);
+				}
+				pageNum++; //页码自增
+			} else {
+				app.showToast(data.data.errMsg, "error");
+			}
+		},
+        complete: function() {
+          //数据加载完成后，重置isLoading
+          isLoading = false;
+        }
+      });
+    }
+
+    $(function() {
+      mui.init({
+        pullRefresh: {
+          container: '#pullrefresh',
+          down: {
+            callback: function() {
+              //下拉刷新时重置页码和列表内容
+              pageIndex = 1;
+              listEl.html('');
+              loadData();
+              setTimeout(function() {
+                mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+                mui('#pullrefresh').pullRefresh().enablePullupToRefresh();
+              }, 500);
+            }
+          },
+          up: {
+            callback: function() {
+              //上拉加载更多时加载数据
+              if (isLoading) {
+                return;
+              }
+              isLoading = true;
+              loadData();
+            }
+          }
+        }
+      });
+
+      //页面初始化时加载数据
+      loadData();
+    });
+  </script>
+</body>
+
+</html>

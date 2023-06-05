@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Cropper</title>
+		<script src="../../js/mui.min.js"></script>
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/header.css" rel="stylesheet" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/cropper.css">
+		<link rel="stylesheet" href="css/main.css">
+		
+		<style>
+			#container {
+				width: 100%;
+				position: absolute;
+				top: 44px;
+				bottom: 0px;
+				background: #000000;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav title" style="position: fixed;">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" style="color: white;"></a>
+			<a id="cutter" class="mui-pull-right" style="font-size: 15px;color: white;line-height: 40px;">
+				<img src="../../images/upload.png" width="20px"/>
+			</a>
+			<h1 class="mui-title title-color"><b id="chatting-nickname">个人头像</b></h1>
+		</header>
+		<!-- Content -->
+		<div id="container">
+			<div>
+			  <input  type="file" id="inputImage" name="file" accept="image/*">
+			</div>
+			<div class="img-container">
+				<img id="image" src="" style="background-color: #000000;">
+			</div>
+		</div>
+
+		  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+		  <script src="https://cdn.bootcss.com/cropper/3.1.6/cropper.min.js"></script>
+
+		<script src="js/cropper.js"></script>
+		<script src="../../js/app.js"></script>
+
+		<script type="text/javascript">
+			mui.init();
+			
+			var $image = $('#image');
+			mui.plusReady(function() {
+				
+				var user = app.getUserGlobalInfo();
+				var faceImage = user.faceImageBig;
+				// 获取屏幕宽度，设置图片
+				$image.attr('src', app.imgServerUrl + faceImage);
+				var options = {
+				  aspectRatio: 1 / 1,
+				  crop: function (e) {
+				  }
+				};
+				$image.cropper(options);
+				
+				/** ======================== 从相册选择图片 ======================== **/
+				// 从相册中选择图片
+				console.log("从相册中选择图片:");
+				var $inputImage = $('#inputImage');
+				if (window.FileReader) {
+				  $inputImage.change(function () {
+					var fileReader = new FileReader();
+					plus.nativeUI.showWaiting( "请稍等..." );
+					fileReader.readAsDataURL(this.files[0]);
+					fileReader.onload = function () {
+					  $image.cropper('destroy').attr('src', this.result).cropper(options);
+					};
+					plus.nativeUI.closeWaiting();
+				  });
+				} else {
+				  $inputImage.addClass('hide');
+				}
+					
+				
+				/** ======================== 图片裁剪 ======================== **/
+				
+				$("#cutter").on('tap', function() {
+					// plus.nativeUI.showWaiting( "上传中..." );
+					var dataURL = $image.cropper('getCroppedCanvas').toDataURL('image/png');
+					// 将dataURL发送到服务器进行保存
+					if(dataURL) {
+			
+						// 与后端联调
+						mui.ajax(app.serverUrl + "/user/uploadFaceBase64",{
+							data:{
+								userId:user.id+"",
+								faceData:dataURL
+							},
+							dataType:'json',//服务器返回json格式数据
+							type:'post',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；
+							headers:{'Content-Type':'application/json'},	              
+							success:function(data){
+								// 关闭等待框
+								// plus.nativeUI.closeWaiting();
+								
+								if (data.status == "success") {
+									app.showToast("头像上传成功","success");
+									var userInfo = data.data;
+									app.setUserGlobalInfo(userInfo);
+									
+									// 触发另外一个webview的自定义事件，可以使用 mui.fire()
+									var imooc_meWebview = plus.webview.getWebviewById("imooc-me.html");
+									mui.fire(imooc_meWebview, "refresh");
+									
+									// 触发另外一个webview的自定义事件，可以使用 mui.fire()
+									var myfaceWebview = plus.webview.getWebviewById("myface.html");
+									mui.fire(myfaceWebview, "refresh");
+									
+									// 页面跳转
+									mui.openWindow("index.html", "index.html");
+								} else {
+									app.showToast(data.msg, "error");
+								}
+							}
+						});
+					}
+				});
+			});
+			
+// 			function faceCutter() {
+// 				plus.nativeUI.showWaiting( "请稍等..." );
+// //				var $image = $('#image');
+// 				var options = {
+// 					aspectRatio: 1 / 1,
+// 					crop: function(e) {}
+// 				};
+// 				// Cropper
+// 				$image.cropper(options);
+// 				plus.nativeUI.closeWaiting();
+// 			}
+		</script>
+
+	</body>
+
+</html>

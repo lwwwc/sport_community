@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/header.css">
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav title">
+			<span id="link_back" class="mui-pull-left mui-icon mui-icon-arrowleft"></span>
+			<h1 class="mui-title title-color" id="title">运动检测</h1>
+			<button id="sportCode" class="mui-btn mui-btn-warning mui-btn-outlined mui-pull-right">开启检测</button>
+		</header>
+		<div class="mui-content">
+			<div id="chartContainer"></div>
+			<br>
+			步数：<p id="steps"></p>
+			距离：<p id="distance"></p>
+			热量：<p id="calories"></p>
+		</div>	
+		<script src="js/mui.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/echarts-all.js"></script>
+		<script type="text/javascript">
+			var stepsCnt = 0;
+			var distanceCnt = 0;
+			var caloriesCnt = 0;
+			mui.init();
+			mui.plusReady(function(){
+				//返回
+				var link_back = document.getElementById("link_back");
+				link_back.addEventListener("tap",function(){
+					mui.back();
+				});
+				//开启
+				var sportCode = document.getElementById("sportCode");
+				sportCode.addEventListener("tap",function(){
+					mui.openWindow("externalPage.html","externalPage.html");
+				});
+		
+				showInfo();
+				setInterval(showInfo, 100000);
+			});
+				
+			function showInfo(){
+				//请求运动数据
+				var user = app.getUserGlobalInfo();
+				mui.ajax(app.serverUrl + "/detection/getSportInfo", {
+					data: {
+						"userId": user.id
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					async: false, 
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					success: function(data) {
+						// console.log(JSON.stringify(data.data));
+						if (data.status == "success") {
+							var steps = document.getElementById("steps");
+							steps.innerText = data.data.steps+"步";
+							stepsCnt = data.data.steps;
+							var distance = document.getElementById("distance");
+							distance.innerText = data.data.distance + "米";
+							distanceCnt = data.data.distance;
+							var calories = document.getElementById("calories");
+							calories.innerText = data.data.caloriesTotal + "卡";
+							caloriesCnt = data.data.caloriesTotal;
+						} else {
+							app.showToast(data.data.errMsg, "error");
+						}
+					}
+				});
+				
+				// 获取容器元素
+				var chartContainer = document.getElementById('chartContainer');
+				
+				// 设置容器元素的宽度和高度
+				chartContainer.style.width = '100%';
+				chartContainer.style.height = '300px';
+				
+				// 基于容器元素初始化图表
+				var chart = echarts.init(chartContainer);
+				
+				// 定义柱状图的配置项和数据
+				var options = {
+				title: {
+					text: '每日运动数据'
+				},
+					xAxis: {
+					  data: ['步数', '距离', '热量']
+					},
+					yAxis: {},
+					series: [{
+					  name: '销量',
+					  type: 'bar',
+					  data: [stepsCnt, distanceCnt, caloriesCnt]
+					}]
+				  };
+				
+				  // 使用配置项和数据绘制图表
+				  chart.setOption(options);
+				
+				
+
+			}
+		
+		</script>
+	</body>
+</html>
